@@ -49,6 +49,30 @@ namespace AspNetPractice.Controllers
                 result = new string(input.Reverse().ToArray()) + input;
             }
 
+            // Самая длинная подстрока начинающаяся и заканчивающаяся на гласную
+            List<int> vowelIndexes = new List<int>(2);
+
+            for (int i = 0; i < result.Length; i++)
+            {
+                if ("aeiouy".Contains(result[i]))
+                {
+                    vowelIndexes.Add(i);
+                    break;
+                }
+            }
+
+            for (int i = result.Length - 1; i >= 0; i--)
+            {
+                if ("aeiouy".Contains(result[i]))
+                {
+                    vowelIndexes.Add(i);
+                    break;
+                }
+
+            }
+
+            var vowelsSubstring = result.Substring(vowelIndexes[0], vowelIndexes[1] - vowelIndexes[0]+1);
+
             // Информация о том, сколько раз входил в обработанную строку каждый символ
             var symbolsDictionary = new Dictionary<char, int>();
 
@@ -72,8 +96,7 @@ namespace AspNetPractice.Controllers
                 symbolsInfoString += $"Symbol: {x.Key}, Times: {x.Value}\n";
             }
 
-
-            result = $"{result} \n{symbolsInfoString}";
+            result = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}";
 
 
             return Ok(result);
