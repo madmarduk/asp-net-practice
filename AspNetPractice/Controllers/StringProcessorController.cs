@@ -49,6 +49,33 @@ namespace AspNetPractice.Controllers
                 result = new string(input.Reverse().ToArray()) + input;
             }
 
+            // Информация о том, сколько раз входил в обработанную строку каждый символ
+            var symbolsDictionary = new Dictionary<char, int>();
+
+            foreach (char x in result)
+            {
+                if (!symbolsDictionary.ContainsKey(x))
+                {
+                    symbolsDictionary.Add(x, 1);
+                }
+                else
+                {
+                    symbolsDictionary[x]++;
+                }
+                
+            }
+
+            string symbolsInfoString = string.Empty;
+
+            foreach (var x in symbolsDictionary)
+            {
+                symbolsInfoString += $"Symbol: {x.Key}, Times: {x.Value}\n";
+            }
+
+
+            result = $"{result} \n{symbolsInfoString}";
+
+
             return Ok(result);
 
         }       
