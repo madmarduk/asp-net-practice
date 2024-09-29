@@ -71,8 +71,8 @@ namespace AspNetPractice.Controllers
     
     public class StringProcessorController : ControllerBase
     {
-        [HttpPost]
-        public async Task<IActionResult> ProcessString([FromBody] string input, [FromQuery] string sortAlgorithm = "quick")
+        [HttpGet]
+        public async Task<IActionResult> ProcessString([FromQuery] string input = "string", [FromQuery] string sortAlgorithm = "quick")
         {
             char[] QuickSort(char[] input, int startIndex, int endIndex)
             {                                
@@ -246,8 +246,16 @@ namespace AspNetPractice.Controllers
 
             string cutResult = result.Remove(randomNumber, 1);
 
+            var displayResult = new
+            {
+                ProccessedString = result,
+                SymbolCounts = symbolsDictionary.Select(kvp => new { Symbol = kvp.Key, Count = kvp.Value }),
+                VowelsSubstring = vowelsSubstring,
+                SortedString = sortedResult,
+                CutString = cutResult
 
-            var displayResult = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}\nОтсортированная строка: {sortedResult}\nУрезанная обработанная строка: {cutResult}";
+            };
+            //var displayResult = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}\nОтсортированная строка: {sortedResult}\nУрезанная обработанная строка: {cutResult}".ToArray();
 
 
             return Ok(displayResult);
