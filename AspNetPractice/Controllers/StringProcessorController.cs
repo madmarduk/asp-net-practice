@@ -67,15 +67,20 @@ namespace AspNetPractice.Controllers
 
 
     [Route("api/[controller]")]
-    [ApiController]
-    
+    [ApiController]   
     public class StringProcessorController : ControllerBase
     {
+        private readonly IConfiguration _configuration;
+        public StringProcessorController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [HttpGet]
         public async Task<IActionResult> ProcessString([FromQuery] string input = "string", [FromQuery] string sortAlgorithm = "quick")
         {
             char[] QuickSort(char[] input, int startIndex, int endIndex)
-            {                                
+            {
                 int i = startIndex;
                 int j = endIndex;
                 var pivot = input[startIndex];
@@ -122,6 +127,18 @@ namespace AspNetPractice.Controllers
             if (string.IsNullOrEmpty(input))
             {
                 return BadRequest("Input string cannot be empty");
+            }
+
+            string[] blackList = _configuration.GetSection("Settings:BlackList").Get<string[]>();
+            // var RandomAPI = _configuration.GetValue<string>("RandomAPI");
+
+            foreach (string word in blackList)
+            {
+                if (input == word)
+                {
+                    return BadRequest("Blacklisted word");
+                }
+                
             }
 
             // Symbols check
@@ -203,11 +220,6 @@ namespace AspNetPractice.Controllers
                 symbolsInfoString += $"Symbol: {x.Key}, Times: {x.Value}\n";
             }
 
-            
-
-
-
-
 
             string sortedResult;
 
@@ -226,10 +238,11 @@ namespace AspNetPractice.Controllers
             // random number
             int stringLen = result.Length - 1;
             int randomNumber;
+            var RandomAPI = _configuration.GetValue<string>("RandomAPI");
             using (HttpClient client = new HttpClient())
             {
 
-                HttpResponseMessage response = await client.GetAsync($"http://www.randomnumberapi.com/api/v1.0/random?min=0&max={stringLen}&count=1");
+                HttpResponseMessage response = await client.GetAsync($"{RandomAPI}{stringLen}");
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
