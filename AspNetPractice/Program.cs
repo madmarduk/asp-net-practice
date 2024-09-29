@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Configuration;
+
 namespace AspNetPractice
 {
     public class Program
@@ -11,6 +13,7 @@ namespace AspNetPractice
             builder.Services.AddControllers();            
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            
 
             var app = builder.Build();
 
