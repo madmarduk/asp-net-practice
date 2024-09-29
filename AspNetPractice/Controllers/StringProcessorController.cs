@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Net.Http;
 
 namespace AspNetPractice.Controllers
 {
@@ -71,7 +72,7 @@ namespace AspNetPractice.Controllers
     public class StringProcessorController : ControllerBase
     {
         [HttpPost]
-        public IActionResult ProcessString([FromBody] string input, [FromQuery] string sortAlgorithm = "quick")
+        public async Task<IActionResult> ProcessString([FromBody] string input, [FromQuery] string sortAlgorithm = "quick")
         {
             char[] QuickSort(char[] input, int startIndex, int endIndex)
             {                                
@@ -202,6 +203,11 @@ namespace AspNetPractice.Controllers
                 symbolsInfoString += $"Symbol: {x.Key}, Times: {x.Value}\n";
             }
 
+            
+
+
+
+
 
             string sortedResult;
 
@@ -217,8 +223,31 @@ namespace AspNetPractice.Controllers
                 return BadRequest("Invalid sort algorithm. Use 'quick' or 'tree'");
             }
 
-            
-            var displayResult = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}\nОтсортированная строка: {sortedResult}";
+            // random number
+            int stringLen = result.Length - 1;
+            int randomNumber;
+            using (HttpClient client = new HttpClient())
+            {
+
+                HttpResponseMessage response = await client.GetAsync($"http://www.randomnumberapi.com/api/v1.0/random?min=0&max={stringLen}&count=1");
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+
+                    int[] randomNumbers = System.Text.Json.JsonSerializer.Deserialize<int[]>(responseBody);
+                    randomNumber = randomNumbers[0];
+                }
+                else
+                {
+                    Random rnd = new Random();
+                    randomNumber = rnd.Next(0, stringLen);
+                }
+            }
+
+            string cutResult = result.Remove(randomNumber, 1);
+
+
+            var displayResult = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}\nОтсортированная строка: {sortedResult}\nУрезанная обработанная строка: {cutResult}";
 
 
             return Ok(displayResult);
