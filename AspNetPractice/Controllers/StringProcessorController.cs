@@ -4,14 +4,120 @@ using System.Linq;
 
 namespace AspNetPractice.Controllers
 {
+    public class TreeNode
+    {
+        public TreeNode(char data)
+        {
+            Data = data;
+        }
+
+        public char Data { get; set; }
+        public TreeNode Left { get; set; }
+        public TreeNode Right { get; set; }
+
+        public void Insert(TreeNode node)
+        {
+            if (node.Data < Data)
+            {
+                if (Left == null)
+                {
+                    Left = node;
+                }
+                else
+                {
+                    Left.Insert(node);
+                }
+            }
+            else
+            {
+                if (Right == null)
+                {
+                    Right = node;
+                }
+                else
+                {
+                    Right.Insert(node);
+                }
+            }            
+        }
+        
+        public char[] Transform(List<char> elements = null)
+        {
+            if (elements == null)
+            {
+                elements = new List<char>();
+            }
+
+            if (Left != null)
+            {
+                Left.Transform(elements);
+            }
+
+            elements.Add(Data);
+
+            if (Right != null)
+            {
+                Right.Transform(elements);
+            }
+
+            return elements.ToArray();
+        }
+    }
+
+
     [Route("api/[controller]")]
     [ApiController]
     
     public class StringProcessorController : ControllerBase
     {
         [HttpPost]
-        public IActionResult ProcessString([FromBody] string input)
+        public IActionResult ProcessString([FromBody] string input, [FromQuery] string sortAlgorithm = "quick")
         {
+            char[] QuickSort(char[] input, int startIndex, int endIndex)
+            {                                
+                int i = startIndex;
+                int j = endIndex;
+                var pivot = input[startIndex];
+
+                while (i <= j)
+                {
+                    while (input[i] < pivot)
+                    {
+                        i++;
+                    }
+
+                    while (input[j] > pivot)
+                    {
+                        j--;
+                    }
+
+                    if (i <= j)
+                    {
+                        (input[j], input[i]) = (input[i], input[j]);
+                        i++;
+                        j--;
+                    }
+                }
+
+                if (startIndex < j) QuickSort(input, startIndex, j);
+                if (i < endIndex) QuickSort(input, i, endIndex);
+
+                return input;
+            }
+
+
+            char[] TreeSort(char[] input)
+            {
+                var treeNode = new TreeNode(input[0]);
+                for (int i = 1; i < input.Length; i++)
+                {
+                    treeNode.Insert(new TreeNode(input[i]));
+                }
+
+                return treeNode.Transform();
+            }
+
+
             if (string.IsNullOrEmpty(input))
             {
                 return BadRequest("Input string cannot be empty");
@@ -96,10 +202,26 @@ namespace AspNetPractice.Controllers
                 symbolsInfoString += $"Symbol: {x.Key}, Times: {x.Value}\n";
             }
 
-            result = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}";
+
+            string sortedResult;
+
+            if (sortAlgorithm.ToLower() == "quick")
+            {
+                sortedResult = new string(QuickSort(result.ToCharArray(), 0, result.Length - 1));
+            } else if (sortAlgorithm.ToLower() == "tree")
+            {
+                sortedResult = new string(TreeSort(result.ToCharArray()));
+            }
+            else
+            {
+                return BadRequest("Invalid sort algorithm. Use 'quick' or 'tree'");
+            }
+
+            
+            var displayResult = $"{result} \n{symbolsInfoString}Подстрока с началом и концом из гласной: {vowelsSubstring}\nОтсортированная строка: {sortedResult}";
 
 
-            return Ok(result);
+            return Ok(displayResult);
 
         }       
         
