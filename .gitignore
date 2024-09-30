@@ -1,3 +1,5 @@
 AspNetPractice/bin/
 AspNetPractice/obj/
 .vs/
+AspNetPractice.Tests/bin/
+AspNetPractice.Tests/obj/
